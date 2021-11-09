@@ -5,6 +5,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './entity/users.entity';
 import { JwtModule } from '@nestjs/jwt';
 import { jwtConstants } from 'src/config/constants';
+import { JwtStrategy } from './jwt.strategy';
 
 @Module({
   imports: [
@@ -17,7 +18,8 @@ import { jwtConstants } from 'src/config/constants';
       },
     }),
   ],
-  providers: [UsersService],
   controllers: [UsersController],
+  // 使用jwt策略
+  providers: [UsersService,JwtStrategy],
 })
 export class UsersModule {}

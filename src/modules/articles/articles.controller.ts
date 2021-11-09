@@ -5,12 +5,16 @@ import {
   HttpException,
   Param,
   Post,
+  UseGuards,
 } from '@nestjs/common';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { AuthGuard } from '@nestjs/passport';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { ArticlesService } from './articles.service';
 import { CreateArticleDto } from './dto/create-aritlce.dto';
 import { UpdateArticleDto } from './dto/update-article.dto';
 
+
+@ApiBearerAuth()
 @ApiTags('文章模块')
 @Controller('articles')
 export class ArticlesController {
@@ -20,6 +24,7 @@ export class ArticlesController {
     summary: '创建文章',
   })
   @Post('/create')
+  @UseGuards(AuthGuard('jwt'))
   async createArticle(@Body() createArticleDto: CreateArticleDto) {
     return await this.articlesService.createArticle(createArticleDto);
   }
