@@ -28,4 +28,13 @@ export class CreateArticleDto {
     message: '内容不能为空',
   })
   content: string;
+
+  @ApiProperty({
+    description: '分类',
+    type: Number,
+  })
+  @IsNotEmpty({
+    message: '分类不能为空',
+  })
+  category:number
 }

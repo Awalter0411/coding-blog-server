@@ -17,6 +17,6 @@ export class Article extends Common {
   @ManyToOne((type)=>User,(user)=>user.articles)
   user: number
 
-  @ManyToMany((type)=>Category,(category)=>category.articles)
-  categories:Category[]
+  @ManyToOne((type)=>Category,(category)=>category.articles)
+  category:number
 }
