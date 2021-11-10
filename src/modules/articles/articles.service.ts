@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateArticleDto } from './dto/create-aritlce.dto';
 import { UpdateArticleDto } from './dto/update-article.dto';
-import { Article } from './entity/articles';
+import { Article } from './entity/articles.entity';
 
 @Injectable()
 export class ArticlesService {
@@ -13,40 +13,42 @@ export class ArticlesService {
   ) {}
 
   // 创建文章
-  async createArticle(createArticleDto: CreateArticleDto) {
+  async createArticle(createArticleDto: CreateArticleDto, userId: number) {
     const article = new Article();
     for (let key in createArticleDto) {
       article[key] = createArticleDto[key];
     }
+    article.user = userId;
     await this.articlesRepository.save(article);
     return '添加成功';
   }
 
   // 查找文章列表
-  async getArticleList() {
+  async getArticleList(userId: number) {
     const articleList = await this.articlesRepository.find({
-      where: { isDelete: false },
+      where: { isDelete: false, user: userId },
     });
-    console.log(articleList);
     return articleList;
   }
 
   // 查找文章详情
-  async getArticleDetail(id: number) {
+  async getArticleDetail(id: number, userId: number) {
     return await this.articlesRepository.findOne({
       where: {
         isDelete: false,
         id: id,
+        user: userId,
       },
     });
   }
   // 修改文章
-  async updateArticle(updateArticleDto: UpdateArticleDto) {
+  async updateArticle(updateArticleDto: UpdateArticleDto,userId:number) {
     const { id } = updateArticleDto;
     const article = await this.articlesRepository.findOne({
       where: {
         isDelete: false,
         id: id,
+        user: userId
       },
     });
     if (!article) {
