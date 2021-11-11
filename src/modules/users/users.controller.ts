@@ -1,7 +1,10 @@
-import { Body, Controller, Post } from '@nestjs/common';
-import { ApiBody, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
+import { AuthGuard } from '@nestjs/passport';
+import { ApiBearerAuth, ApiBody, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { AuthUser } from './decorators/user.decorator';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
 import { UsersService } from './users.service';
 import { LoginVo } from './vo/login.vo';
 import { RegisterVo } from './vo/register.vo';
@@ -49,4 +52,29 @@ export class UsersController {
     async login(@Body () loginDto: LoginDto) {
       return await this.usersService.login(loginDto);
     }
+
+
+    @ApiBearerAuth()
+    @UseGuards(AuthGuard('jwt'))
+    @Get('userInfo')
+    async getUserInfo(@AuthUser('id') userId) {
+      return await this.usersService.getUserInfo(userId)
+    }
+
+    /**
+     * 修改用户信息
+     * @param updateUserDto 
+     * @param userId 
+     * @returns 
+     */
+    @ApiOperation({
+      summary: '修改用户信息'
+    })
+    @ApiBearerAuth()
+    @UseGuards(AuthGuard('jwt'))
+    @Post('update')
+    async updateUser(@Body() updateUserDto:UpdateUserDto,@AuthUser('id') userId:number) {
+      return await this.usersService.updateUser(updateUserDto,userId)
+    }
+
 }

@@ -23,4 +23,8 @@ export class User extends Common{
 
   @OneToMany((type)=> Category,(category)=>category.user)
   categories:Category[]
+
+  // 个人介绍
+  @Column('text')
+  desc: string;
 }

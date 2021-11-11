@@ -6,6 +6,7 @@ import { JwtService } from '@nestjs/jwt';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
 import { User } from './entity/users.entity';
+import { UpdateUserDto } from './dto/update-user.dto';
 
 @Injectable()
 export class UsersService {
@@ -41,6 +42,7 @@ export class UsersService {
     }
     newUser.password = hashPassword;
     newUser.salt = salt;
+    newUser.desc = 'Hello World';
     const result = await this.userRepository.save(newUser);
     return {
       id: result.id,
@@ -73,6 +75,55 @@ export class UsersService {
     const token = this.jwtService.sign(payload);
     return {
       token,
+    };
+  }
+
+  // 获取用户信息
+  async getUserInfo(userId: number) {
+    const user = await this.userRepository.findOne({
+      where: {
+        id: userId,
+      },
+    });
+    return {
+      id: userId,
+      username: user.username,
+      desc: user.desc,
+    };
+  }
+
+  // 修改用户信息
+  async updateUser(updateUserDto: UpdateUserDto, userId: number) {
+    const user = await this.userRepository.findOne({
+      where: {
+        id: userId,
+      },
+    });
+    if (!user) {
+      throw new HttpException('用户不存在', 404);
+    }
+    if (updateUserDto.oldPassword && updateUserDto.oldPassword) {
+      const { oldPassword, newPassword } = updateUserDto;
+      const oldHashPassword = encryptPassword(oldPassword, user.salt);
+      if (oldHashPassword !== user.password) {
+        throw new HttpException('原密码错误', 404);
+      }
+      const salt = makeSalt();
+      const newHashPassword = encryptPassword(newPassword, salt);
+      if (oldPassword === newPassword) {
+        throw new HttpException('新密码与原密码不能一致', 404);
+      }
+      user.password = newHashPassword;
+      user.salt = salt;
+    }
+    user.username = updateUserDto.username;
+    user.desc = updateUserDto.desc;
+    await this.userRepository.save(user);
+    return {
+      id: user.id,
+      username: user.username,
+      desc: user.desc,
+      createTime: user.createTime,
     };
   }
 }

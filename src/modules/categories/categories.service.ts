@@ -25,7 +25,7 @@ export class CategoriesService {
     category.user = userId;
     const hasCategory = await this.categoryRepository.findOne({
       where: {
-        isDelete:false,
+        isDelete: false,
         name: category.name,
         user: userId,
       },
@@ -34,18 +34,22 @@ export class CategoriesService {
       throw new HttpException('分类已经存在', 404);
     }
     await this.categoryRepository.save(category);
-    return '添加成功';
+    return await this.categoryRepository.find({
+      where: {
+        isDelete: false,
+      },
+    });
   }
 
   // 查找所有分类
-  async getCategoryList(userId:number){
+  async getCategoryList(userId: number) {
     const categoryList = await this.categoryRepository.find({
-      where:{
+      where: {
         isDelete: false,
-        user:userId
+        user: userId,
       },
-    })
-    return categoryList
+    });
+    return categoryList;
   }
 
   // 删除分类
@@ -76,6 +80,12 @@ export class CategoriesService {
     category.isDelete = true;
     await this.categoryRepository.save(category);
 
-    return '删除成功';
+    const res = await this.categoryRepository.find({
+      where: {
+        isDelete: false,
+      },
+    });
+    console.log(res);
+    return res;
   }
 }

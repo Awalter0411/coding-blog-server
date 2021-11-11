@@ -32,18 +32,23 @@ export class ArticlesService {
     }
     article.user = userId;
     await this.articlesRepository.save(article);
-    return '添加成功';
+    return await this.articlesRepository.find({
+      where: {
+        isDelete: false,
+      },
+    });
   }
 
   // 查找文章列表
   async getArticleList(articleListDto: ArticleListDto, userId: number) {
-    const { page = 1, pageSize = 1 } = articleListDto;
+    const { page = 1, pageSize = 10 } = articleListDto;
     const articleList = await this.articlesRepository.find({
       where: { isDelete: false, user: userId },
       relations: ['category'],
-      skip: (page - 1) * pageSize,
+      skip: ((page - 1) * pageSize),
       take: pageSize,
     });
+    console.log(articleList)
     return articleList;
   }
 
@@ -101,6 +106,10 @@ export class ArticlesService {
     }
     article.isDelete = true;
     await this.articlesRepository.save(article);
-    return '删除成功';
+    return await this.articlesRepository.find({
+      where: {
+        isDelete: false,
+      },
+    });
   }
 }
