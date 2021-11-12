@@ -11,9 +11,6 @@ export class Article extends Common {
   @Column('text')
   content: string;
 
-  @Column('text')
-  description: string;
-
   @ManyToOne((type)=>User,(user)=>user.articles)
   user: number
 

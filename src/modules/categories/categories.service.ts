@@ -1,8 +1,8 @@
 import { HttpException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { skip } from 'rxjs';
 import { Repository } from 'typeorm';
 import { Article } from '../articles/entity/articles.entity';
+import { User } from '../users/entity/users.entity';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { Category } from './entity/categories.entity';
 
@@ -14,7 +14,18 @@ export class CategoriesService {
 
     @InjectRepository(Article)
     private readonly articleRepository: Repository<Article>,
+
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
   ) {}
+
+  async getUser(username: string) {
+    return await this.userRepository.findOne({
+      where: {
+        username: username,
+      },
+    });
+  }
 
   // 创建分类
   async createCategory(createCategoryDto: CreateCategoryDto, userId: number) {
@@ -33,6 +44,9 @@ export class CategoriesService {
     if (hasCategory) {
       throw new HttpException('分类已经存在', 404);
     }
+    if (!category.name) {
+      throw new HttpException('分类名不能为空', 404);
+    }
     await this.categoryRepository.save(category);
     return await this.categoryRepository.find({
       where: {
@@ -42,11 +56,12 @@ export class CategoriesService {
   }
 
   // 查找所有分类
-  async getCategoryList(userId: number) {
+  async getCategoryList(username: string) {
+    const user = await this.getUser(username);
     const categoryList = await this.categoryRepository.find({
       where: {
         isDelete: false,
-        user: userId,
+        user: user.id,
       },
     });
     return categoryList;
@@ -85,7 +100,6 @@ export class CategoriesService {
         isDelete: false,
       },
     });
-    console.log(res);
     return res;
   }
 }

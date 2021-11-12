@@ -15,55 +15,63 @@ import { ArticleListDto } from './dto/article-list.dto';
 import { CreateArticleDto } from './dto/create-aritlce.dto';
 import { UpdateArticleDto } from './dto/update-article.dto';
 
-
-@ApiBearerAuth()
 @ApiTags('文章模块')
 @Controller('articles')
 export class ArticlesController {
   constructor(private readonly articlesService: ArticlesService) {}
 
+  @ApiBearerAuth()
   @ApiOperation({
     summary: '创建文章',
   })
   @Post('/create')
   @UseGuards(AuthGuard('jwt'))
-  async createArticle(@Body() createArticleDto: CreateArticleDto,@AuthUser('id') userId:number) {
+  async createArticle(
+    @Body() createArticleDto: CreateArticleDto,
+    @AuthUser('id') userId: number,
+  ) {
     return await this.articlesService.createArticle(createArticleDto, userId);
   }
 
   @ApiOperation({
     summary: '查找文章列表',
   })
-  @Post('list')
-  @UseGuards(AuthGuard('jwt'))
-  async getArticleList(@Body() articleListDto:ArticleListDto,@AuthUser('id') userId:number) {
-    return await this.articlesService.getArticleList(articleListDto,userId);
+  @Get('list/:username')
+  async getArticleList(@Param('username') username: string) {
+    return await this.articlesService.getArticleList(username);
   }
 
   @ApiOperation({
-    summary:'查找文章详情'
-  })  
-  @UseGuards(AuthGuard('jwt'))
+    summary: '查找文章详情',
+  })
   @Get(':id')
-  async getArticleDetail(@Param('id') id: number,@AuthUser('id') userId:number) {
-    return await this.articlesService.getArticleDetail(id,userId);
+  async getArticleDetail(
+    @Param('id') id: number,
+    @Param('username') username: string,
+  ) {
+    return await this.articlesService.getArticleDetail(id, username);
   }
 
+  @ApiBearerAuth()
   @ApiOperation({
-    summary:'修改文章'
+    summary: '修改文章',
   })
   @Post('/update')
   @UseGuards(AuthGuard('jwt'))
-  async updateArticle(@Body() updateArticleDto:UpdateArticleDto,@AuthUser('id') userId:number){
-    return await this.articlesService.updateArticle(updateArticleDto,userId)
+  async updateArticle(
+    @Body() updateArticleDto: UpdateArticleDto,
+    @AuthUser('id') userId: number,
+  ) {
+    return await this.articlesService.updateArticle(updateArticleDto, userId);
   }
 
+  @ApiBearerAuth()
   @ApiOperation({
-    summary: '删除文章'
+    summary: '删除文章',
   })
   @Delete('/delete/:id')
   @UseGuards(AuthGuard('jwt'))
-  async deleteArticle(@Param('id') id:number,@AuthUser('id') userId:number){
-    return await this.articlesService.deleteArtilce(id,userId)
+  async deleteArticle(@Param('id') id: number, @AuthUser('id') userId: number) {
+    return await this.articlesService.deleteArtilce(id, userId);
   }
 }

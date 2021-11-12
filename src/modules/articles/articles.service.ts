@@ -2,6 +2,7 @@ import { HttpException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Category } from '../categories/entity/categories.entity';
+import { User } from '../users/entity/users.entity';
 import { ArticleListDto } from './dto/article-list.dto';
 import { CreateArticleDto } from './dto/create-aritlce.dto';
 import { UpdateArticleDto } from './dto/update-article.dto';
@@ -14,7 +15,18 @@ export class ArticlesService {
     private readonly articlesRepository: Repository<Article>,
     @InjectRepository(Category)
     private readonly categoryRepository: Repository<Category>,
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
   ) {}
+
+  // 查找用户
+  async getUser(username:string){
+    return await this.userRepository.findOne({
+      where: {
+        username
+      }
+    })
+  }
 
   // 创建文章
   async createArticle(createArticleDto: CreateArticleDto, userId: number) {
@@ -40,25 +52,23 @@ export class ArticlesService {
   }
 
   // 查找文章列表
-  async getArticleList(articleListDto: ArticleListDto, userId: number) {
-    const { page = 1, pageSize = 10 } = articleListDto;
+  async getArticleList(username: string) {
+    const user = await this.getUser(username)
     const articleList = await this.articlesRepository.find({
-      where: { isDelete: false, user: userId },
+      where: { isDelete: false, user: user.id },
       relations: ['category'],
-      skip: ((page - 1) * pageSize),
-      take: pageSize,
     });
-    console.log(articleList)
     return articleList;
   }
 
   // 查找文章详情
-  async getArticleDetail(id: number, userId: number) {
+  async getArticleDetail(id: number, username: string) {
+    const user = await this.getUser(username)
     const article = await this.articlesRepository.findOne({
       where: {
         isDelete: false,
         id: id,
-        user: userId,
+        user: user.id,
       },
       relations: ['category'],
     });
@@ -110,6 +120,7 @@ export class ArticlesService {
       where: {
         isDelete: false,
       },
+      relations: ['category'],
     });
   }
 }

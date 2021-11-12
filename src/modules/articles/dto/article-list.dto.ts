@@ -1,15 +1,9 @@
-import { ApiProperty } from "@nestjs/swagger";
+import { ApiProperty } from '@nestjs/swagger';
 
 export class ArticleListDto {
   @ApiProperty({
-    description:'分页',
-    type:Number
+    description: '用户名',
+    type: String,
   })
-  readonly page?: number;
-
-  @ApiProperty({
-    description:'单页数量',
-    type:Number
-  })
-  readonly pageSize?: number;
+  readonly username: string;
 }
