@@ -75,19 +75,18 @@ export class UsersService {
     const token = this.jwtService.sign(payload);
     return {
       token,
-      username
+      username,
     };
   }
 
   // 获取用户信息
-  async getUserInfo(userId: number) {
+  async getUserInfo(username: string) {
     const user = await this.userRepository.findOne({
       where: {
-        id: userId,
+        username,
       },
     });
     return {
-      id: userId,
       username: user.username,
       desc: user.desc,
     };
@@ -103,21 +102,6 @@ export class UsersService {
     if (!user) {
       throw new HttpException('用户不存在', 404);
     }
-    if (updateUserDto.oldPassword && updateUserDto.oldPassword) {
-      const { oldPassword, newPassword } = updateUserDto;
-      const oldHashPassword = encryptPassword(oldPassword, user.salt);
-      if (oldHashPassword !== user.password) {
-        throw new HttpException('原密码错误', 404);
-      }
-      const salt = makeSalt();
-      const newHashPassword = encryptPassword(newPassword, salt);
-      if (oldPassword === newPassword) {
-        throw new HttpException('新密码与原密码不能一致', 404);
-      }
-      user.password = newHashPassword;
-      user.salt = salt;
-    }
-    user.username = updateUserDto.username;
     user.desc = updateUserDto.desc;
     await this.userRepository.save(user);
     return {

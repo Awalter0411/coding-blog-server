@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Category } from '../categories/entity/categories.entity';
 import { User } from '../users/entity/users.entity';
+import { ArticleDetailDto } from './dto/article-detail.dto';
 import { ArticleListDto } from './dto/article-list.dto';
 import { CreateArticleDto } from './dto/create-aritlce.dto';
 import { UpdateArticleDto } from './dto/update-article.dto';
@@ -20,12 +21,12 @@ export class ArticlesService {
   ) {}
 
   // 查找用户
-  async getUser(username:string){
+  async getUser(username: string) {
     return await this.userRepository.findOne({
       where: {
-        username
-      }
-    })
+        username,
+      },
+    });
   }
 
   // 创建文章
@@ -53,7 +54,7 @@ export class ArticlesService {
 
   // 查找文章列表
   async getArticleList(username: string) {
-    const user = await this.getUser(username)
+    const user = await this.getUser(username);
     const articleList = await this.articlesRepository.find({
       where: { isDelete: false, user: user.id },
       relations: ['category'],
@@ -61,13 +62,36 @@ export class ArticlesService {
     return articleList;
   }
 
+  // 根据分类查找文章列表
+  async getArticleListByCate(id: number) {
+    const category = await this.categoryRepository.findOne({
+      where: {
+        id: id,
+        isDelete: false,
+      },
+    });
+    if (!category) {
+      throw new HttpException('分类不存在', 404);
+    }
+    const articleList = await this.articlesRepository.find({
+      where: {
+        category: category.id,
+        isDelete: false,
+      },
+    });
+    return {
+      articleList,
+      categoryName: category.name,
+    };
+  }
+
   // 查找文章详情
-  async getArticleDetail(id: number, username: string) {
-    const user = await this.getUser(username)
+  async getArticleDetail(articleDetailDto: ArticleDetailDto) {
+    const user = await this.getUser(articleDetailDto.username);
     const article = await this.articlesRepository.findOne({
       where: {
         isDelete: false,
-        id: id,
+        id: articleDetailDto.id,
         user: user.id,
       },
       relations: ['category'],
@@ -87,8 +111,10 @@ export class ArticlesService {
         user: userId,
       },
     });
-    const hasCategory = await this.articlesRepository.findOne({
+    const hasCategory = await this.categoryRepository.findOne({
       where: {
+        isDelete: false,
+        user: userId,
         id: updateArticleDto.category,
       },
     });

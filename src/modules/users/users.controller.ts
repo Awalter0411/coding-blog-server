@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiBearerAuth, ApiBody, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { AuthUser } from './decorators/user.decorator';
@@ -54,11 +54,15 @@ export class UsersController {
     }
 
 
-    @ApiBearerAuth()
-    @UseGuards(AuthGuard('jwt'))
-    @Get('userInfo')
-    async getUserInfo(@AuthUser('id') userId) {
-      return await this.usersService.getUserInfo(userId)
+    /**
+     * 获取用户信息
+     */
+    @ApiOperation({
+      summary:'获取用户信息'
+    })
+    @Get('userInfo/:username')
+    async getUserInfo(@Param('username') username:string) {
+      return await this.usersService.getUserInfo(username)
     }
 
     /**

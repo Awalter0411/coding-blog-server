@@ -8,9 +8,10 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
-import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiParam, ApiProperty, ApiTags } from '@nestjs/swagger';
 import { AuthUser } from '../users/decorators/user.decorator';
 import { ArticlesService } from './articles.service';
+import { ArticleDetailDto } from './dto/article-detail.dto';
 import { ArticleListDto } from './dto/article-list.dto';
 import { CreateArticleDto } from './dto/create-aritlce.dto';
 import { UpdateArticleDto } from './dto/update-article.dto';
@@ -42,14 +43,26 @@ export class ArticlesController {
   }
 
   @ApiOperation({
+    summary:'根据分类查找文章列表'
+  })
+  @ApiParam({
+    type:Number,
+    name:'id',
+    description:'分类id'
+  })
+  @Get('listByCate/:id')
+  async getArticleListByCate(@Param('id') id:number) {
+    return await this.articlesService.getArticleListByCate(id)
+  }
+
+  @ApiOperation({
     summary: '查找文章详情',
   })
-  @Get(':id')
+  @Post('detail')
   async getArticleDetail(
-    @Param('id') id: number,
-    @Param('username') username: string,
+    @Body() articleDetailDto:ArticleDetailDto
   ) {
-    return await this.articlesService.getArticleDetail(id, username);
+    return await this.articlesService.getArticleDetail(articleDetailDto);
   }
 
   @ApiBearerAuth()

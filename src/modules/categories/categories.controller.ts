@@ -35,7 +35,7 @@ export class CategoriesController {
     summary: '查找文章分类列表',
   })
   @Get('/list/:username')
-  async getCategoryList(@Param('username') username:string) {
+  async getCategoryList(@Param('username') username: string) {
     return await this.categoryService.getCategoryList(username);
   }
 
